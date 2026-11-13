@@ -3730,17 +3730,24 @@ export function allocateClone(metaWindow) {
         let vMax = metaWindow.maximized_vertically;
         let hMax = metaWindow.maximized_horizontally;
 
-        const protrusion = Math.min(
-            Settings.prefs.selection_border_size,
-            Settings.prefs.vertical_margin,
+        // Protrude into the available space on each axis independently, so
+        // a zero vertical margin doesn't also hide the side borders.
+        const borderSize = Settings.prefs.selection_border_size;
+        const hProtrusion = hMax ? 0 : Math.max(0, Math.min(
+            borderSize,
             Settings.prefs.window_gap
-        );
+        ));
+        const vProtrusion = vMax ? 0 : Math.max(0, Math.min(
+            borderSize,
+            Settings.prefs.vertical_margin,
+            Settings.prefs.vertical_margin_bottom
+        ));
 
-        selection.x = hMax ? 0 : -protrusion;
-        selection.y = vMax ? 0 : -protrusion;
+        selection.x = -hProtrusion;
+        selection.y = -vProtrusion;
         selection.set_size(
-            frame.width + (hMax ? 0 : protrusion * 2),
-            frame.height + (vMax ? 0 : protrusion * 2));
+            frame.width + hProtrusion * 2,
+            frame.height + vProtrusion * 2);
 
         const rtop = Settings.prefs.selection_border_radius_top;
         const rbottom = Settings.prefs.selection_border_radius_bottom;
